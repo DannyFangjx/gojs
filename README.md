@@ -3,7 +3,6 @@
 
 ## todo list
   * 按目录支持js
-  * 安全相关: 文件访问权限，网络请求限制
 
 ## quick start
 git clone

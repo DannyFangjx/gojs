@@ -83,6 +83,10 @@ func gojaFunc(input []interface{}, script string) string {
 
 func v8goFunc(input []interface{}, script string) string {
 	ctx := v8.NewContext()
+
+	//禁止访问 require 和 process 对象
+	_, _ = ctx.RunScript("delete require; delete process;", "")
+
 	//user js code
 	ctx.RunScript(script, "")
 	//sys js code
