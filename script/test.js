@@ -1,3 +1,3 @@
 function run(...args){
-    return args[3]['p4']
+    return JSON.stringify(args[3]['p4'])
 }

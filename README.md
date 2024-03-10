@@ -3,6 +3,8 @@
 
 ## todo list
   * 按目录支持js
+  * 交叉编译 以及 x86_64 centos服务器上编译。
+  * 安全方面待优化
 
 ## quick start
 git clone
@@ -27,6 +29,6 @@ curl --location 'http://localhost:19800/runjs' \
             "p4": 4
         }
     ],
-    "script": "./script/es6.js"
+    "script": "./script/test.js"
 }'
 ```
