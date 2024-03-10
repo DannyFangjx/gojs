@@ -1,3 +1,3 @@
-function run(...args){
+function run(input){
     return 129+89
 }

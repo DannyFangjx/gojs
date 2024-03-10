@@ -2,7 +2,6 @@
   封装一个go http 服务，执行指定js文件中的run函数。  
 
 ## todo list
-  * 按目录支持js
   * 交叉编译 以及 x86_64 centos服务器上编译。
   * 安全方面待优化
 
@@ -27,8 +26,16 @@ curl --location 'http://localhost:19800/runjs' \
         {
             "p1":"123",
             "p4": 4
+        },
+        {
+            "te1":"1"
         }
     ],
     "script": "./script/test.js"
 }'
 ```
+
+### change log
+* 20240310 utc+8
+ 1. 删除 goja的返回
+ 2. js脚本中 run(input) 只接受一个固定的input对象；input对象支持 all(),first(), last() 等方法。

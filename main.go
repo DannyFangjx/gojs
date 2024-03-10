@@ -44,9 +44,9 @@ func runJsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// run
 	v8goOut := v8goFunc(req.Params, script)
-	gojaOut := gojaFunc(req.Params, script)
+	//gojaOut := gojaFunc(req.Params, script)
 	ret := map[string]interface{}{
-		"goja_out": gojaOut,
+		//"goja_out": gojaOut,
 		"v8go_out": v8goOut,
 	}
 	fmt.Fprintf(w, "%s", jsonStr(ret))
@@ -60,6 +60,51 @@ func main() {
 }
 
 func gojaFunc(input []interface{}, script string) string {
+	vm := goja.New()
+	// 执行 JavaScript 字符串
+	_, _ = vm.RunString(script)
+
+	// 定义 req 对象
+	req := vm.ToValue(map[string]interface{}{
+		"item": input,
+		"all": func(call goja.FunctionCall) goja.Value {
+			// 返回所有对象
+			data := call.Argument(0).ToObject(vm).Get("item").Export().([]interface{})
+			return vm.ToValue(data)
+		},
+		"first": func(call goja.FunctionCall) goja.Value {
+			// 返回第一个对象
+			data := call.Argument(0).ToObject(vm).Get("item").Export().([]interface{})
+			if len(data) > 0 {
+				return vm.ToValue(data[0])
+			}
+			return nil
+		},
+		"last": func(call goja.FunctionCall) goja.Value {
+			// 返回最后一个对象
+			data := call.Argument(0).ToObject(vm).Get("item").Export().([]interface{})
+			if len(data) > 0 {
+				return vm.ToValue(data[len(data)-1])
+			}
+			return nil
+		},
+	})
+
+	// 将 req 对象设置为全局对象
+	vm.Set("req", req)
+
+	// 调用 JavaScript 函数 run
+	_, err := vm.RunString("const result = run(req); result;")
+	if err != nil {
+		return err.Error()
+	}
+
+	// 返回结果
+	result := vm.Get("result")
+	return result.String()
+}
+
+func gojaFunc1(input []interface{}, script string) string {
 	vm := goja.New()
 	// 执行js字符串
 	_, _ = vm.RunString(script)
@@ -90,7 +135,32 @@ func v8goFunc(input []interface{}, script string) string {
 	//user js code
 	ctx.RunScript(script, "")
 	//sys js code
-	ctx.RunScript(fmt.Sprintf(`const result = run(...%v)`, jsonStr(input)), "")
+	ctx.RunScript(fmt.Sprintf(`
+				args = %v 
+				let req = {
+					// item
+					item: args,
+			
+					// 返回所有对象
+					all: function() {
+						return args;
+					},
+					// 返回第一个对象
+					first: function() {
+						return args.length > 0 ? args[0] : undefined;
+					},
+					// 返回最后一个对象
+					last: function() {
+						return args.length > 0 ? args[args.length - 1] : undefined;
+					},
+					// 环境参数，和本demo无关。
+					params: {
+						'limits': 10,
+					}
+					// json  todo
+					// input.context.noItemsLeft 和本demo无关。
+				};
+				const result = run(req)`, jsonStr(input)), "")
 	val, err := ctx.RunScript("result", "value.js")
 	if err != nil {
 		println("run err:", err.Error())
