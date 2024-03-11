@@ -104,28 +104,6 @@ func gojaFunc(input []interface{}, script string) string {
 	return result.String()
 }
 
-func gojaFunc1(input []interface{}, script string) string {
-	vm := goja.New()
-	// 执行js字符串
-	_, _ = vm.RunString(script)
-	// 校验函数并返回
-	runfunc, ok := goja.AssertFunction(vm.Get("run"))
-	if !ok {
-		panic("not function")
-	}
-	// 将 input 转换为 JavaScript 中的值
-	jsInput := make([]goja.Value, len(input))
-	for i, v := range input {
-		jsInput[i] = vm.ToValue(v)
-	}
-	// 调用 JavaScript 函数 run
-	result, err := runfunc(nil, jsInput...)
-	if err != nil {
-		return err.Error()
-	}
-	return result.String()
-}
-
 func v8goFunc(input []interface{}, script string) string {
 	ctx := v8.NewContext()
 
